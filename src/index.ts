@@ -44,7 +44,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
-    cookie: { secure: true, maxAge: 24 * 60 * 60 * 1000 }, // Set secure: true if using HTTPS
+    cookie: { secure: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 1000 }, // Set secure: true if using HTTPS
   })
 );
 
