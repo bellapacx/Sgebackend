@@ -46,7 +46,7 @@ app.use(session({
   cookie: {
     secure: true, // Use true when serving over HTTPS (your case with GitHub Pages)
     httpOnly: true,
-    sameSite: 'None', // Important for cross-origin requests
+    sameSite: 'none', // Important for cross-origin requests
     maxAge: 24 * 60 * 60 * 1000 // Optional: set cookie expiration
   }
 }));
