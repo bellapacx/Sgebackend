@@ -38,15 +38,18 @@ const sessionStore = MongoStore.create({
 });
 
 // Configure express-session
-app.use(
-  session({
-    secret: 'your-secret-key', // Change to a more secure key in production
-    resave: false,
-    saveUninitialized: false,
-    store: sessionStore,
-    cookie: { secure: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 1000 }, // Set secure: true if using HTTPS
-  })
-);
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  store: sessionStore,
+  cookie: {
+    secure: true, // Use true when serving over HTTPS (your case with GitHub Pages)
+    httpOnly: true,
+    sameSite: 'None', // Important for cross-origin requests
+    maxAge: 24 * 60 * 60 * 1000 // Optional: set cookie expiration
+  }
+}));
 
 // Routes
 app.use('/api', productRoutes, storeRoutes, poRoutes, soRoutes, vehicleRoutes, srRoutes, emptyRoute, userRoute);
