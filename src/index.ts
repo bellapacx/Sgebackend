@@ -31,7 +31,7 @@ app.use(bodyParser.json());
 
 
 // Configure MongoDB session store
-const mongoUrl = 'mongodb://localhost:27017/products-db'; // Update to your MongoDB URL
+const mongoUrl = 'mongodb+srv://bella:bellamongo@cluster0.n3ihytm.mongodb.net/sge?retryWrites=true&w=majority&appName=Cluster0'; // Update to your MongoDB URL
 const sessionStore = MongoStore.create({
   mongoUrl,
   collectionName: 'sessions', // Optional: default is 'sessions'
