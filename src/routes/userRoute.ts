@@ -1,21 +1,11 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import User from '../models/users';
-import session from 'express-session';
-import user from '../types/session'; // Ensure this is importing the file correctly
-
-// Import express-session for session management
+import jwt from 'jsonwebtoken';
+import authenticateToken from '../middleware/authMiddleware'; // Import the JWT middleware
 
 const router = express.Router();
-
-// Middleware to check if user is authenticated
-const isAuthenticated = (req: Request, res: Response, next: Function) => {
-    if (req.session && req.session.user) {
-        return next();
-    } else {
-        return res.status(401).json({ error: 'Not authenticated' });
-    }
-};
+const secretKey = '9f8c6d8b2a5e3b1f4e9d7a9b3c2a7d6e4f8b1c0d6e7f8a9b0c1d2e3f4g5h6i7j'; // Ensure this key is stored securely and not hard-coded
 
 // Register a new user
 router.post('/register', async (req: Request, res: Response) => {
@@ -80,43 +70,29 @@ router.post('/login', async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Invalid password' });
         }
 
-        // Set session information
-        req.session.user = { username: user.username, role: user.role, store_id: user.store_id };
-        
-        // Log session data
-        console.log('Session Data Set:', req.session.user);
+        // Generate a JWT token
+        const token = jwt.sign({ username: user.username, role: user.role, store_id: user.store_id }, secretKey, { expiresIn: '1h' });
+
         // Successful login
-        res.status(200).json({ message: 'Login successful',  user: req.session.user });
+        res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
         res.status(500).json({ error: 'An error occurred while logging in' });
     }
 });
 
-// Logout user
-router.post('/logout', (req: Request, res: Response) => {
-    if (req.session) {
-        req.session.destroy((err) => {
-            if (err) {
-                return res.status(500).json({ error: 'An error occurred while logging out' });
-            }
-            res.status(200).json({ message: 'Logout successful' });
-        });
-    } else {
-        res.status(400).json({ error: 'No session to destroy' });
-    }
-});
+// Logout user (JWT doesn't have a logout mechanism as such; just remove the token on the client-side)
 
 // Get current user
-router.get('/current-user', isAuthenticated, (req: Request, res: Response) => {
-    if (req.session && req.session.user) {
-        res.status(200).json(req.session.user);
+router.get('/current-user', authenticateToken, (req: Request, res: Response) => {
+    if ((req as any).user) {
+        res.status(200).json((req as any).user);
     } else {
         res.status(401).json({ error: 'Not authenticated' });
     }
 });
 
 // Get all users
-router.get('/users', async (req: Request, res: Response) => {
+router.get('/users', authenticateToken, async (req: Request, res: Response) => {
     try {
         const users = await User.find().select('username phone_number role store_id created_at').populate('store_id');
         res.status(200).json(users);
@@ -126,7 +102,7 @@ router.get('/users', async (req: Request, res: Response) => {
 });
 
 // Get a single user by ID
-router.get('/users/:id', async (req: Request, res: Response) => {
+router.get('/users/:id', authenticateToken, async (req: Request, res: Response) => {
     try {
         const user = await User.findById(req.params.id).select('username phone_number role store_id created_at').populate('store_id');
         if (!user) {
