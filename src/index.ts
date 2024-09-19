@@ -40,7 +40,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     secure: true, // Use true when serving over HTTPS (your case with GitHub Pages)
-    sameSite: 'lax', // Important for cross-origin requests
+    sameSite: 'none', // Important for cross-origin requests
     domain: 'bellapacx.github.io',
   }
 }));
