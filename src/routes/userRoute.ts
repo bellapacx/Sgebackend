@@ -82,7 +82,9 @@ router.post('/login', async (req: Request, res: Response) => {
 
         // Set session information
         req.session.user = { username: user.username, role: user.role, store_id: user.store_id };
-
+        
+        // Log session data
+        console.log('Session Data Set:', req.session.user);
         // Successful login
         res.status(200).json({ message: 'Login successful', user: { username: user.username, role: user.role, store_id: user.store_id } });
     } catch (error) {
