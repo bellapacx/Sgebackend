@@ -17,11 +17,11 @@ import bodyParser from 'body-parser';
 const app = express();
 const port = 5010;
 
-const allowedOrigins = ['https://bellapacx.github.io']; // Add other origins if needed
+// Add other origins if needed
 // Middleware
 // CORS Middleware
 app.use(cors({
-  origin: allowedOrigins,
+  origin: 'https://bellapacx.github.io',
   credentials: true
 }));
 
