@@ -22,7 +22,7 @@ const allowedOrigins = ['https://bellapacx.github.io']; // Add other origins if 
 // CORS Middleware
 app.use(cors({
   origin: allowedOrigins,
-  credentials: true,
+  credentials: true
 }));
 
 app.use(express.json());
@@ -48,7 +48,6 @@ app.use(session({
     httpOnly: true,
     sameSite: 'none', // Important for cross-origin requests
     domain: 'bellapacx.github.io',
-    maxAge: 24 * 60 * 60 * 1000 // Optional: set cookie expiration
   }
 }));
 
