@@ -17,7 +17,7 @@ import bodyParser from 'body-parser';
 const app = express();
 const port = 5010;
 
-const allowedOrigins = ['https://bellapacx.github.io']; // Add other origins if needed
+const allowedOrigins = ['https://bellapacx.github.io/Sge']; // Add other origins if needed
 // Middleware
 // CORS Middleware
 app.use(cors({
@@ -47,6 +47,7 @@ app.use(session({
     secure: true, // Use true when serving over HTTPS (your case with GitHub Pages)
     httpOnly: true,
     sameSite: 'none', // Important for cross-origin requests
+    domain: 'bellapacx.github.io',
     maxAge: 24 * 60 * 60 * 1000 // Optional: set cookie expiration
   }
 }));
