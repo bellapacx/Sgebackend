@@ -17,7 +17,7 @@ import bodyParser from 'body-parser';
 const app = express();
 const port = 5010;
 
-const allowedOrigins = ['https://bellapacx.github.io/Sge']; // Add other origins if needed
+const allowedOrigins = ['https://bellapacx.github.io/']; // Add other origins if needed
 // Middleware
 // CORS Middleware
 app.use(cors({
