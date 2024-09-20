@@ -6,10 +6,10 @@ const router = express.Router();
 // Create a new product
 router.post('/products', async (req: Request, res: Response) => {
   try {
-    const { name, category, purchase_price, sell_price, unit } = req.body;
+    const { name, category, purchase_price, default_sell_price, unit, store_prices, sub_agent_prices } = req.body;
 
     // Ensure all required fields are present
-    if (!name || !category || !purchase_price || !sell_price || !unit) {
+    if (!name || !category || !purchase_price || !default_sell_price || !unit) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -17,8 +17,10 @@ router.post('/products', async (req: Request, res: Response) => {
       name,
       category,
       purchase_price,
-      sell_price,
+      default_sell_price,
       unit,
+      store_prices, // Optional: array of store-specific prices
+      sub_agent_prices, // Optional: array of sub-agent-specific prices
     });
 
     await product.save();
@@ -67,11 +69,11 @@ router.get('/products/:id', async (req: Request, res: Response) => {
 // Update a product
 router.put('/products/:id', async (req: Request, res: Response) => {
   try {
-    const { name, category, purchase_price, sell_price, unit } = req.body;
+    const { name, category, purchase_price, default_sell_price, unit, store_prices, sub_agent_prices } = req.body;
 
     const product = await ProductModel.findByIdAndUpdate(
       req.params.id,
-      { name, category, purchase_price, sell_price, unit },
+      { name, category, purchase_price, default_sell_price, unit, store_prices, sub_agent_prices },
       { new: true }
     );
 

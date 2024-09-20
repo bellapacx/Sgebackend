@@ -13,6 +13,7 @@ import srRoutes from './routes/srRoutes';
 import emptyRoute from './routes/emptyRoute';
 import userRoute from './routes/userRoute';
 import bodyParser from 'body-parser';
+import SubagentR from './routes/SubagentR';
 
 const app = express();
 const port = 5010;
@@ -46,7 +47,7 @@ app.use(session({
 }));
 
 // Routes
-app.use('/api', productRoutes, storeRoutes, poRoutes, soRoutes, vehicleRoutes, srRoutes, emptyRoute, userRoute);
+app.use('/api', productRoutes, storeRoutes, poRoutes, soRoutes, vehicleRoutes, srRoutes, emptyRoute, userRoute,SubagentR);
 
 // Connect to MongoDB
 mongoose.connect(mongoUrl)
