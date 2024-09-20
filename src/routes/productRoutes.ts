@@ -1,5 +1,7 @@
 import express, { Request, Response } from 'express';
 import ProductModel from '../models/product';
+import Store from '../models/stores';
+import EmptyCrate from '../models/emptyCrates';
 import mongoose from 'mongoose';
 
 const router = express.Router();
@@ -114,15 +116,30 @@ router.put('/products/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Delete a product
+// Delete a product and remove it from store inventories
 router.delete('/products/:id', async (req: Request, res: Response) => {
   try {
-    const product = await ProductModel.findByIdAndDelete(req.params.id);
-    if (product) {
-      res.status(200).json({ message: 'Product deleted successfully' });
-    } else {
-      res.status(404).json({ error: 'Product not found' });
+    const productId = req.params.id;
+
+    // Step 1: Delete the product from the products collection
+    const product = await ProductModel.findByIdAndDelete(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
     }
+
+    // Step 2: Remove the product from all inventories
+    await Store.updateMany(
+      {},
+      { $pull: { inventory: { product_id: productId } } }
+    );
+
+    // Step 2: Remove the product from all inventories
+    await EmptyCrate.updateMany(
+      {},
+      { $pull: { inventory: { product_id: productId } } }
+    );
+
+    res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -131,5 +148,6 @@ router.delete('/products/:id', async (req: Request, res: Response) => {
     }
   }
 });
+
 
 export default router;
