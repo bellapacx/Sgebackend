@@ -8,7 +8,9 @@ const router = Router();
 // Create a new sell order and update store inventory
 router.post('/sorders', async (req: Request, res: Response) => {
   try {
-    const { store_id, product_id, quantity, sell_date, customer_name } = req.body;
+    const { store_id, product_id, quantity, sell_date, customer_name, pricing_type, sub_agent_id } = req.body;
+    // `pricing_type` indicates whether to use 'store' or 'sub_agent' pricing
+    // `sub_agent_id` will be provided if pricing_type is 'sub_agent'
 
     // Find the store by ID
     const store = await Store.findById(store_id);
@@ -35,19 +37,32 @@ router.post('/sorders', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Insufficient stock' });
     }
 
-    // Determine the sell price based on store-specific or default pricing
-    const storePrice = product.store_prices?.find(sp => sp.store_id.toString() === store_id);
-    const sellPrice = storePrice ? storePrice.sell_price : product.default_sell_price;
+    // Determine the sell price based on the `pricing_type` (store or sub-agent)
+    let sellPrice: number;
+
+    if (pricing_type === 'store') {
+      // Find the store-specific price
+      const storePrice = product.store_prices?.find(sp => sp.store_id.toString() === store_id);
+      sellPrice = storePrice ? storePrice.sell_price : product.default_sell_price;
+    } else if (pricing_type === 'sub_agent' && sub_agent_id) {
+      // Find the sub-agent-specific price
+      const subAgentPrice = product.sub_agent_prices?.find(sa => sa.sub_agent_id.toString() === sub_agent_id);
+      sellPrice = subAgentPrice ? subAgentPrice.sell_price : product.default_sell_price;
+    } else {
+      // Default to the product's default sell price if no specific price is found
+      sellPrice = product.default_sell_price;
+    }
 
     // Calculate the total sell price
-    const total_sell_price = sellPrice * quantity;
+    const total_amount = sellPrice * quantity;
 
     // Create the sell order
     const sellOrder = new SellOrder({
       store_id,
       product_id,
       quantity,
-      sell_price: total_sell_price,
+      sell_price: sellPrice,
+      total_amount, // Assign the calculated total amount
       sell_date,
       customer_name,
       created_at: new Date(),
@@ -112,7 +127,7 @@ router.get('/sell-reports', async (req: Request, res: Response) => {
     }
 
     // Aggregate data on the backend
-    const total_revenue = sellOrders.reduce((acc, order) => acc + order.sell_price, 0);
+    const total_revenue = sellOrders.reduce((acc, order) => acc + order.total_amount, 0);
     const quantity_sold = sellOrders.reduce((acc, order) => acc + order.quantity, 0);
 
     res.status(200).json({
