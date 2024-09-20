@@ -14,24 +14,17 @@ router.post('/products', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Validate and convert store_prices
-    const convertStorePrices = (prices: any) => {
-      return prices.map((price: any) => ({
-        ...price,
-        store_id: new mongoose.Types.ObjectId(price.store_id), // Use new here
-      }));
-    };
+    // Convert store_prices to the correct structure
+    const convertedStorePrices = store_prices ? store_prices.map((price: any) => ({
+      store_id: new mongoose.Types.ObjectId(price.store_id), // Convert to ObjectId
+      sell_price: price.sell_price,
+    })) : [];
 
-    // Validate and convert sub_agent_prices
-    const convertSubAgentPrices = (prices: any) => {
-      return prices.map((price: any) => ({
-        ...price,
-        sub_agent_id: new mongoose.Types.ObjectId(price.sub_agent_id), // Use new here
-      }));
-    };
-
-    let convertedStorePrices = store_prices ? convertStorePrices(store_prices) : undefined;
-    let convertedSubAgentPrices = sub_agent_prices ? convertSubAgentPrices(sub_agent_prices) : undefined;
+    // Convert sub_agent_prices to the correct structure
+    const convertedSubAgentPrices = sub_agent_prices ? sub_agent_prices.map((price: any) => ({
+      sub_agent_id: new mongoose.Types.ObjectId(price.sub_agent_id), // Convert to ObjectId
+      sell_price: price.sell_price,
+    })) : [];
 
     const product = new ProductModel({
       name,
@@ -39,8 +32,8 @@ router.post('/products', async (req: Request, res: Response) => {
       purchase_price,
       default_sell_price,
       unit,
-      store_prices: convertedStorePrices, // Optional: array of store-specific prices
-      sub_agent_prices: convertedSubAgentPrices, // Optional: array of sub-agent-specific prices
+      store_prices: convertedStorePrices,
+      sub_agent_prices: convertedSubAgentPrices,
     });
 
     await product.save();
@@ -91,15 +84,14 @@ router.put('/products/:id', async (req: Request, res: Response) => {
   try {
     const { name, category, purchase_price, default_sell_price, unit, store_prices, sub_agent_prices } = req.body;
 
-    // Convert IDs to ObjectId before updating
     const updatedStorePrices = store_prices ? store_prices.map((price: any) => ({
-      ...price,
       store_id: new mongoose.Types.ObjectId(price.store_id),
+      sell_price: price.sell_price,
     })) : undefined;
 
     const updatedSubAgentPrices = sub_agent_prices ? sub_agent_prices.map((price: any) => ({
-      ...price,
       sub_agent_id: new mongoose.Types.ObjectId(price.sub_agent_id),
+      sell_price: price.sell_price,
     })) : undefined;
 
     const product = await ProductModel.findByIdAndUpdate(
