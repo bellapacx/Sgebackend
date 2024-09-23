@@ -176,6 +176,21 @@ router.put('/porders/:id', async (req: Request, res: Response) => {
     }
   });
   
-
+  router.delete('/porders', async (req: Request, res: Response) => {
+    const { created_at } = req.body; // Expecting ISO date format
+  
+    try {
+      const result = await PurchaseOrder.deleteMany({ created_at: { $lt: new Date(created_at) } });
+  
+      if (result.deletedCount > 0) {
+        res.status(200).json({ message: `${result.deletedCount} orders deleted successfully.` });
+      } else {
+        res.status(404).json({ message: 'No orders found to delete.' });
+      }
+    } catch (error) {
+      console.error('Error deleting sell orders:', error);
+      res.status(500).json({ message: 'Error deleting sell orders' });
+    }
+  });
 
 export default router;
