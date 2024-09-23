@@ -114,4 +114,32 @@ router.get('/users/:id', authenticateToken, async (req: Request, res: Response) 
     }
 });
 
+// Update a user's password
+router.put('/users/:id/password', authenticateToken, async (req: Request, res: Response) => {
+    const { newPassword } = req.body;
+
+    // Validate request body
+    if (!newPassword) {
+        return res.status(400).json({ error: 'New password is required' });
+    }
+
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Hash the new password before saving (assuming you're using bcrypt)
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword; // Update the user's password
+        await user.save(); // Save the changes
+
+        res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Error updating password:', error);
+        res.status(500).json({ error: 'An error occurred while updating the password' });
+    }
+});
+
+
 export default router;
