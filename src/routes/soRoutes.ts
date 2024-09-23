@@ -142,25 +142,21 @@ router.get('/sell-reports', async (req: Request, res: Response) => {
 });
 
 // DELETE /sorders - Delete sell orders created before a specific date
+// DELETE /sorders - Delete sell orders created before a specific date
 router.delete('/sorders', async (req: Request, res: Response) => {
-  const { date } = req.body; // Expecting a date in the request body
-
-  if (!date) {
-    return res.status(400).json({ message: 'Date is required' });
-  }
+  const { created_at } = req.body; // Expecting ISO date format
 
   try {
-    // Delete orders created before the specified date
-    const result = await SellOrder.deleteMany({ createdAt: { $lt: new Date(date) } });
+    const result = await SellOrder.deleteMany({ created_at: { $lt: new Date(created_at) } });
 
     if (result.deletedCount > 0) {
-      return res.status(200).json({ message: `${result.deletedCount} orders deleted successfully.` });
+      res.status(200).json({ message: `${result.deletedCount} orders deleted successfully.` });
     } else {
-      return res.status(404).json({ message: 'No orders found to delete.' });
+      res.status(404).json({ message: 'No orders found to delete.' });
     }
   } catch (error) {
     console.error('Error deleting sell orders:', error);
-    return res.status(500).json({ message: 'Error deleting sell orders' });
+    res.status(500).json({ message: 'Error deleting sell orders' });
   }
 });
 
